@@ -5,6 +5,8 @@ import { ServiceUI } from './components/ServiceUI';
 import { AdminDashboard } from './components/AdminDashboard';
 import { LoginPage } from './components/LoginPage';
 import { DemoPage } from './components/DemoPage';
+import { FloorPlan } from './components/FloorPlan';
+import { KioskLock } from './components/KioskLock';
 
 function getUser(): { role: string } | null {
   try {
@@ -39,9 +41,21 @@ function App() {
       <Route
         path="/kitchen"
         element={
-          <PrivateRoute roles={['kitchen', 'admin']}>
-            <KitchenDisplay />
-          </PrivateRoute>
+          <KioskLock stationName="Küchenstation">
+            <PrivateRoute roles={['kitchen', 'admin']}>
+              <KitchenDisplay />
+            </PrivateRoute>
+          </KioskLock>
+        }
+      />
+      <Route
+        path="/floor"
+        element={
+          <KioskLock stationName="Buffet / Tischplan">
+            <PrivateRoute roles={['service', 'admin']}>
+              <FloorPlan />
+            </PrivateRoute>
+          </KioskLock>
         }
       />
       <Route

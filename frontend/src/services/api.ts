@@ -14,9 +14,15 @@ async function request(path: string, options?: RequestInit & { noAuth?: boolean 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
 
   if (res.status === 401 && !path.includes('/auth/')) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    const kioskRoutes = ['/kitchen', '/floor'];
+    const isKiosk = kioskRoutes.some(r => window.location.pathname.startsWith(r));
+    if (isKiosk) {
+      window.dispatchEvent(new CustomEvent('kiosk:locked'));
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
     throw new Error('Unauthorized');
   }
 

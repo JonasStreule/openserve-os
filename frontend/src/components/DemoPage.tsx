@@ -49,6 +49,15 @@ const RESTAURANTS: Restaurant[] = [
         description: 'Überblick über Tagesumsatz, verwaltet die kurze Speisekarte und die Counter-Plätze.',
       },
       {
+        label: 'Buffet-Station (Tischplan)',
+        tag: 'Station',
+        tagColor: '#7c3aed',
+        username: 'Buffet',
+        pin: '6666',
+        role: 'service',
+        description: 'Grafische Tischübersicht — Bestellungen aufnehmen und Tischstatus sehen.',
+      },
+      {
         label: 'Gast am Outdoor-1',
         tag: 'Gast',
         tagColor: 'var(--color-secondary)',
@@ -104,6 +113,24 @@ const RESTAURANTS: Restaurant[] = [
         description: 'Bestellqueue mit allen Positionen. Status von "Ausstehend" → "In Zubereitung" → "Fertig".',
       },
       {
+        label: 'Küchenstation (Wanddisplay)',
+        tag: 'Station',
+        tagColor: '#7c3aed',
+        username: 'Küche',
+        pin: '5555',
+        role: 'kitchen',
+        description: 'Stationslogin für das feste Küchengerät — kein persönlicher Mitarbeiter-Account.',
+      },
+      {
+        label: 'Buffet-Station (Tischplan)',
+        tag: 'Station',
+        tagColor: '#7c3aed',
+        username: 'Buffet',
+        pin: '6666',
+        role: 'service',
+        description: 'Grafische Tischübersicht am Buffet — Tischstatus, offene Bestellungen, Buchungen.',
+      },
+      {
         label: 'Gast am Tisch T-2',
         tag: 'Gast',
         tagColor: 'var(--color-secondary)',
@@ -141,6 +168,9 @@ export function DemoPage() {
       }
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      // Station personas go to their station route
+      if (persona.username === 'Buffet') { navigate('/floor'); return; }
+      if (persona.username === 'Küche') { navigate('/kitchen'); return; }
       switch (data.user.role) {
         case 'admin': navigate('/admin'); break;
         case 'kitchen': navigate('/kitchen'); break;
