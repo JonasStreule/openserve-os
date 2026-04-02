@@ -6,3 +6,9 @@ dist/
 frontend/node_modules/
 frontend/dist/
 frontend/.env
+
+# Tenant instances (each has its own secrets — never commit)
+tenants/
+
+# Local backups
+backups/

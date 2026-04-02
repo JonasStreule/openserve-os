@@ -32,6 +32,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
       PORT: 3000
       NODE_ENV: production
+      SENTRY_DSN: ${SENTRY_DSN:-}
     depends_on:
       postgres:
         condition: service_healthy
