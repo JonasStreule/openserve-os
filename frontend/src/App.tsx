@@ -4,6 +4,7 @@ import { KitchenDisplay } from './components/KitchenDisplay';
 import { ServiceUI } from './components/ServiceUI';
 import { AdminDashboard } from './components/AdminDashboard';
 import { LoginPage } from './components/LoginPage';
+import { DemoPage } from './components/DemoPage';
 
 function getUser(): { role: string } | null {
   try {
@@ -25,6 +26,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/demo" element={<DemoPage />} />
       <Route path="/guest" element={<GuestUI />} />
       <Route
         path="/service"

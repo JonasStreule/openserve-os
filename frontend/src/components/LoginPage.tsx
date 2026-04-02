@@ -91,7 +91,10 @@ export function LoginPage() {
           {loading ? 'Logging in...' : 'Login'}
         </button>
 
-        <a href="/guest" style={{ display: 'block', marginTop: '24px', color: 'var(--color-info)', fontSize: '14px', textDecoration: 'none' }}>
+        <a href="/demo" style={{ display: 'block', marginTop: '20px', color: 'var(--color-primary)', fontSize: '14px', textDecoration: 'none', fontWeight: '600' }}>
+          Demo ausprobieren →
+        </a>
+        <a href="/guest" style={{ display: 'block', marginTop: '10px', color: 'var(--color-info)', fontSize: '13px', textDecoration: 'none' }}>
           Guest? Order here
         </a>
       </div>
