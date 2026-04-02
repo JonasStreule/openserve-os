@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useWebSocket } from '../services/useWebSocket';
+
+interface OrderItem {
+  id: string;
+  product_id: string;
+  name: string;
+  quantity: number;
+  unit_price: string;
+  status: string;
+}
 
 interface Order {
   id: string;
@@ -8,9 +18,11 @@ interface Order {
   status: string;
   total_amount: string;
   created_at: string;
+  items: OrderItem[];
 }
 
 export function KitchenDisplay() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const { lastMessage, connected } = useWebSocket('kitchen');
 
@@ -25,12 +37,10 @@ export function KitchenDisplay() {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
-  // React to WebSocket updates
   useEffect(() => {
     if (lastMessage) fetchOrders();
   }, [lastMessage, fetchOrders]);
 
-  // Fallback polling every 5s
   useEffect(() => {
     const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
@@ -65,38 +75,24 @@ export function KitchenDisplay() {
           <span style={{ color: 'var(--color-secondary)', fontSize: '14px' }}>
             {activeOrders.length} active
           </span>
-          <span style={{
-            fontSize: '12px',
-            color: connected ? 'var(--color-success)' : 'var(--color-error)',
-          }}>
+          <span style={{ fontSize: '12px', color: connected ? 'var(--color-success)' : 'var(--color-error)' }}>
             {connected ? 'Live' : 'Offline'}
           </span>
+          <button className="button secondary" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); navigate('/login'); }}
+            style={{ fontSize: '12px', height: '32px', color: 'var(--color-error)' }}>
+            Logout
+          </button>
         </div>
       </div>
-
-      {!navigator.onLine && (
-        <div style={{
-          background: 'var(--color-warning)',
-          color: 'white',
-          padding: '12px',
-          borderRadius: 'var(--radius-md)',
-          marginBottom: '16px',
-          fontWeight: '600',
-        }}>
-          Offline Mode - Will sync when back online
-        </div>
-      )}
 
       <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
         {activeOrders.map(order => (
           <div key={order.id} className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
               <div>
-                <h2 style={{ margin: '0 0 4px 0', fontSize: '24px' }}>
-                  Table {order.table_number}
-                </h2>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '24px' }}>Table {order.table_number}</h2>
                 <p style={{ margin: 0, color: 'var(--color-secondary)', fontSize: '13px' }}>
-                  Waiting: {getWaitTime(order.created_at)} | CHF {parseFloat(order.total_amount).toFixed(2)}
+                  {getWaitTime(order.created_at)} waiting
                 </p>
               </div>
               <span style={{
@@ -110,6 +106,26 @@ export function KitchenDisplay() {
               }}>
                 {order.status}
               </span>
+            </div>
+
+            {/* Order items */}
+            <div style={{ marginBottom: '12px', borderTop: '1px solid var(--color-gray-200)', paddingTop: '10px' }}>
+              {order.items.length === 0 ? (
+                <p style={{ margin: 0, color: 'var(--color-secondary)', fontSize: '13px' }}>No items recorded</p>
+              ) : (
+                order.items.map((item, i) => (
+                  <div key={item.id || i} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '4px 0',
+                    fontSize: '15px',
+                    borderBottom: i < order.items.length - 1 ? '1px solid var(--color-gray-100)' : 'none',
+                  }}>
+                    <span style={{ fontWeight: '600' }}>{item.quantity}×</span>
+                    <span style={{ flex: 1, marginLeft: '10px' }}>{item.name || 'Item'}</span>
+                  </div>
+                ))
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>

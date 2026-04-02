@@ -1,47 +1,57 @@
-import { useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { GuestUI } from './components/GuestUI';
 import { KitchenDisplay } from './components/KitchenDisplay';
 import { ServiceUI } from './components/ServiceUI';
 import { AdminDashboard } from './components/AdminDashboard';
+import { LoginPage } from './components/LoginPage';
 
-type View = 'guest' | 'service' | 'kitchen' | 'admin';
+function getUser(): { role: string } | null {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function PrivateRoute({ children, roles }: { children: React.ReactNode; roles: string[] }) {
+  const user = getUser();
+  if (!user || !localStorage.getItem('token')) return <Navigate to="/login" replace />;
+  if (!roles.includes(user.role)) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
 function App() {
-  const [view, setView] = useState<View>('service');
-
-  const navBtn = (v: View) => ({
-    flex: 1,
-    padding: '12px',
-    border: 'none',
-    background: view === v ? 'var(--color-black)' : 'transparent',
-    color: view === v ? 'var(--color-white)' : 'var(--color-secondary)',
-    fontFamily: 'var(--font-system)',
-    fontSize: '13px',
-    fontWeight: '600' as const,
-    cursor: 'pointer' as const,
-  });
-
   return (
-    <div>
-      <nav style={{
-        display: 'flex',
-        borderBottom: '1px solid var(--color-gray-200)',
-        background: 'var(--color-white)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-      }}>
-        <button style={navBtn('guest')} onClick={() => setView('guest')}>Guest</button>
-        <button style={navBtn('service')} onClick={() => setView('service')}>Service</button>
-        <button style={navBtn('kitchen')} onClick={() => setView('kitchen')}>Kitchen</button>
-        <button style={navBtn('admin')} onClick={() => setView('admin')}>Admin</button>
-      </nav>
-
-      {view === 'guest' && <GuestUI />}
-      {view === 'service' && <ServiceUI />}
-      {view === 'kitchen' && <KitchenDisplay />}
-      {view === 'admin' && <AdminDashboard />}
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/guest" element={<GuestUI />} />
+      <Route
+        path="/service"
+        element={
+          <PrivateRoute roles={['service', 'admin']}>
+            <ServiceUI />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/kitchen"
+        element={
+          <PrivateRoute roles={['kitchen', 'admin']}>
+            <KitchenDisplay />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute roles={['admin']}>
+            <AdminDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 

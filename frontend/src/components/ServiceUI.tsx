@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useWebSocket } from '../services/useWebSocket';
 
@@ -24,6 +25,7 @@ interface CashSession {
 type ServiceTab = 'orders' | 'cash' | 'payments';
 
 export function ServiceUI() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<ServiceTab>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [cashSession, setCashSession] = useState<CashSession | null>(null);
@@ -124,12 +126,15 @@ export function ServiceUI() {
     <div style={{ padding: '16px', maxWidth: '900px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <h1 style={{ margin: 0, fontSize: '24px' }}>Service</h1>
-        <span style={{
-          fontSize: '12px',
-          color: connected ? 'var(--color-success)' : 'var(--color-error)',
-        }}>
-          {connected ? 'Live' : 'Offline'}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '12px', color: connected ? 'var(--color-success)' : 'var(--color-error)' }}>
+            {connected ? 'Live' : 'Offline'}
+          </span>
+          <button className="button secondary" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); navigate('/login'); }}
+            style={{ fontSize: '12px', height: '32px', color: 'var(--color-error)' }}>
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
