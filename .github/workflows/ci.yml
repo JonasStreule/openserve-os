@@ -8,8 +8,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/openserve-os-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/openserve-os-frontend
+  IMAGE_BACKEND: ghcr.io/jonasstreule/openserve-os-backend
+  IMAGE_FRONTEND: ghcr.io/jonasstreule/openserve-os-frontend
 
 jobs:
   # ─────────────────────────────────────────────
