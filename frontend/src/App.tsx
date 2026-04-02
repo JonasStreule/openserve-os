@@ -7,6 +7,7 @@ import { LoginPage } from './components/LoginPage';
 import { DemoPage } from './components/DemoPage';
 import { FloorPlan } from './components/FloorPlan';
 import { KioskLock } from './components/KioskLock';
+import { LandingPage } from './components/LandingPage';
 
 function getUser(): { role: string } | null {
   try {
@@ -27,6 +28,7 @@ function PrivateRoute({ children, roles }: { children: React.ReactNode; roles: s
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/demo" element={<DemoPage />} />
       <Route path="/guest" element={<GuestUI />} />
@@ -66,7 +68,7 @@ function App() {
           </PrivateRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

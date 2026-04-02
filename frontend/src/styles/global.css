@@ -107,6 +107,35 @@ input:focus {
   border-color: var(--color-info);
 }
 
+/* ── Mobile responsive ───────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Larger tap targets on phones */
+  .button {
+    height: 48px;
+    font-size: 15px;
+  }
+
+  /* Full-width inputs on small screens */
+  input, textarea {
+    width: 100%;
+  }
+
+  /* Cards get less padding */
+  .card {
+    padding: var(--space-3);
+  }
+}
+
+/* Service / Kitchen sticky header on mobile */
+@media (max-width: 600px) {
+  .mobile-scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-scroll-x::-webkit-scrollbar { display: none; }
+}
+
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
   :root {

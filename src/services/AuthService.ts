@@ -16,10 +16,11 @@ export class AuthService {
   }
 
   static generateToken(userId: string, role: string): string {
+    const expiry = process.env.JWT_EXPIRY || '8h';
     return jwt.sign(
       { userId, role, iat: Math.floor(Date.now() / 1000) },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: expiry }
     );
   }
 
