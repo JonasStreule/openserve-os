@@ -26,7 +26,6 @@ interface PlacedOrder {
 
 export function GuestUI() {
   const [searchParams] = useSearchParams();
-  const [tableId, setTableId] = useState<string | null>(null);
   const [tableNumber, setTableNumber] = useState<string>('');
   const [sessionError, setSessionError] = useState('');
   const [products, setProducts] = useState<MenuItem[]>([]);
@@ -55,7 +54,6 @@ export function GuestUI() {
       } else if (!data.table_number || data.table_number === 'unknown') {
         setSessionError('Table not found. Please ask your server.');
       } else {
-        setTableId(data.table_number);
         setTableNumber(data.table_number);
       }
       setLoading(false);
@@ -76,10 +74,10 @@ export function GuestUI() {
     });
   }, []);
 
-  // Track order status via WebSocket
+  // Track order status via WebSocket — message shape: { event, data: order, timestamp }
   useEffect(() => {
-    if (lastMessage && placedOrder && lastMessage.orderId === placedOrder.id) {
-      setPlacedOrder(prev => prev ? { ...prev, status: lastMessage.status } : prev);
+    if (lastMessage?.event === 'order:updated' && placedOrder && lastMessage.data?.id === placedOrder.id) {
+      setPlacedOrder(prev => prev ? { ...prev, status: lastMessage.data.status } : prev);
     }
   }, [lastMessage, placedOrder]);
 
