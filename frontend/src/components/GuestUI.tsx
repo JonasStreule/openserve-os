@@ -19,6 +19,7 @@ interface CartItem {
 
 interface PlacedOrder {
   id: string;
+  order_number: number;
   status: string;
   total_amount: string;
   table_number: string;
@@ -34,6 +35,8 @@ export function GuestUI() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [orderError, setOrderError] = useState('');
+  const [placing, setPlacing] = useState(false);
 
   const { lastMessage } = useWebSocket('guest');
 
@@ -52,13 +55,13 @@ export function GuestUI() {
       if (data.error) {
         setSessionError(data.error);
       } else if (!data.table_number || data.table_number === 'unknown') {
-        setSessionError('Table not found. Please ask your server.');
+        setSessionError('Tisch nicht gefunden. Bitte wenden Sie sich an das Servicepersonal.');
       } else {
         setTableNumber(data.table_number);
       }
       setLoading(false);
     }).catch(() => {
-      setSessionError('Invalid QR code');
+      setSessionError('Ungültiger QR-Code');
       setLoading(false);
     });
   }, [searchParams]);
@@ -66,7 +69,7 @@ export function GuestUI() {
   // Load products
   useEffect(() => {
     api.getProducts().then((data: any) => {
-      const items: MenuItem[] = data.products || [];
+      const items: MenuItem[] = (data.products || []).map((p: any) => ({ ...p, price: parseFloat(p.price) || 0 }));
       setProducts(items);
       const cats = [...new Set(items.map(p => p.category))];
       setCategories(cats);
@@ -117,7 +120,9 @@ export function GuestUI() {
   };
 
   const placeOrder = async () => {
-    if (!tableNumber) return;
+    if (!tableNumber || placing) return;
+    setPlacing(true);
+    setOrderError('');
     try {
       const data = await api.createGuestOrder({
         table_id: tableNumber,
@@ -129,11 +134,13 @@ export function GuestUI() {
         })),
       });
       if (data.id) {
-        setPlacedOrder({ id: data.id, status: data.status, total_amount: data.total_amount, table_number: data.table_number });
+        setPlacedOrder({ id: data.id, order_number: data.order_number, status: data.status, total_amount: data.total_amount, table_number: data.table_number });
         setCart([]);
       }
     } catch {
-      // keep cart, show nothing
+      setOrderError('Bestellung fehlgeschlagen. Bitte erneut versuchen.');
+    } finally {
+      setPlacing(false);
     }
   };
 
@@ -142,10 +149,10 @@ export function GuestUI() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pending': return 'Order received';
-      case 'preparing': return 'Being prepared';
-      case 'ready': return 'Ready to serve!';
-      case 'served': return 'Enjoy your meal!';
+      case 'pending': return 'Bestellung eingegangen';
+      case 'preparing': return 'Wird zubereitet';
+      case 'ready': return 'Bereit zum Servieren!';
+      case 'served': return 'Guten Appetit!';
       default: return status;
     }
   };
@@ -166,7 +173,7 @@ export function GuestUI() {
     return (
       <div style={{ padding: '24px', textAlign: 'center', maxWidth: '400px', margin: '0 auto', marginTop: '80px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>OpenServe OS</h1>
-        <p style={{ color: 'var(--color-secondary)', marginBottom: '32px' }}>Please scan the QR code at your table to start ordering.</p>
+        <p style={{ color: 'var(--color-secondary)', marginBottom: '32px' }}>Bitte scannen Sie den QR-Code an Ihrem Tisch, um zu bestellen.</p>
       </div>
     );
   }
@@ -174,7 +181,7 @@ export function GuestUI() {
   if (loading) {
     return (
       <div style={{ padding: '24px', textAlign: 'center', marginTop: '80px' }}>
-        <p style={{ color: 'var(--color-secondary)' }}>Loading...</p>
+        <p style={{ color: 'var(--color-secondary)' }}>Laden...</p>
       </div>
     );
   }
@@ -183,7 +190,7 @@ export function GuestUI() {
     return (
       <div style={{ padding: '24px', textAlign: 'center', maxWidth: '400px', margin: '0 auto', marginTop: '80px' }}>
         <p style={{ color: 'var(--color-error)', fontWeight: '600' }}>{sessionError}</p>
-        <p style={{ color: 'var(--color-secondary)', fontSize: '14px' }}>Please ask your server for assistance.</p>
+        <p style={{ color: 'var(--color-secondary)', fontSize: '14px' }}>Bitte wenden Sie sich an das Servicepersonal.</p>
       </div>
     );
   }
@@ -192,10 +199,11 @@ export function GuestUI() {
   if (placedOrder) {
     return (
       <div style={{ padding: '24px', maxWidth: '500px', margin: '0 auto', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', marginBottom: '8px' }}>Table {placedOrder.table_number}</h1>
+        <h1 style={{ fontSize: '24px', marginBottom: '4px' }}>Bestellung #{String(placedOrder.order_number || 0).padStart(3, '0')}</h1>
+        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: 'var(--color-secondary)' }}>Tisch {placedOrder.table_number}</p>
 
         <div className="card" style={{ padding: '32px', marginBottom: '24px' }}>
-          <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: 'var(--color-secondary)' }}>Order Status</p>
+          <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: 'var(--color-secondary)' }}>Bestellstatus</p>
           <div style={{
             display: 'inline-block',
             background: getStatusColor(placedOrder.status),
@@ -209,7 +217,7 @@ export function GuestUI() {
             {getStatusLabel(placedOrder.status)}
           </div>
           <p style={{ margin: '8px 0 0 0', color: 'var(--color-secondary)', fontSize: '14px' }}>
-            Total: CHF {parseFloat(placedOrder.total_amount).toFixed(2)}
+            Gesamt: CHF {parseFloat(placedOrder.total_amount).toFixed(2)}
           </p>
         </div>
 
@@ -219,7 +227,7 @@ export function GuestUI() {
             style={{ width: '100%', height: '48px', fontSize: '16px' }}
             onClick={() => setPlacedOrder(null)}
           >
-            Order More
+            Weitere Bestellung aufgeben
           </button>
         )}
       </div>
@@ -235,8 +243,18 @@ export function GuestUI() {
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ padding: '16px', borderBottom: '1px solid var(--color-gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '22px' }}>Menu</h1>
-        <span style={{ color: 'var(--color-secondary)', fontSize: '14px' }}>Table {tableNumber}</span>
+        <div>
+          <p style={{ margin: 0, fontSize: '11px', color: 'var(--color-secondary)', fontWeight: '500', letterSpacing: '0.5px' }}>OpenServe OS</p>
+          <h1 style={{ margin: 0, fontSize: '22px' }}>Speisekarte</h1>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <span style={{ color: 'var(--color-secondary)', fontSize: '14px' }}>Tisch {tableNumber}</span>
+          {cartCount > 0 && (
+            <p style={{ margin: '2px 0 0 0', fontSize: '12px', fontWeight: '600', color: 'var(--color-primary)' }}>
+              {cartCount} im Warenkorb
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Category tabs */}
@@ -310,16 +328,20 @@ export function GuestUI() {
           borderTop: '1px solid var(--color-gray-200)',
         }}>
           <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+            {orderError && (
+              <p style={{ color: 'var(--color-error)', fontSize: '14px', marginBottom: '8px', textAlign: 'center' }}>{orderError}</p>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ color: 'var(--color-secondary)' }}>{cartCount} {cartCount === 1 ? 'item' : 'items'}</span>
+              <span style={{ color: 'var(--color-secondary)' }}>{cartCount} Artikel</span>
               <span style={{ fontWeight: '700', fontSize: '18px' }}>CHF {cartTotal.toFixed(2)}</span>
             </div>
             <button
               className="button primary"
               style={{ width: '100%', height: '48px', fontSize: '16px' }}
               onClick={placeOrder}
+              disabled={placing}
             >
-              Place Order
+              {placing ? 'Wird bestellt...' : 'Bestellen'}
             </button>
           </div>
         </div>

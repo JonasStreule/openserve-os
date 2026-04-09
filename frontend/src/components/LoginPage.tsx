@@ -29,7 +29,7 @@ export function LoginPage() {
         default: navigate('/service'); break;
       }
     } catch {
-      setError('Login failed');
+      setError('Anmeldung fehlgeschlagen');
     }
     setLoading(false);
   };
@@ -42,7 +42,7 @@ export function LoginPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-gray-100)' }}>
       <div style={{ width: '320px', textAlign: 'center' }}>
         <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '4px' }}>OpenServe OS</h1>
-        <p style={{ color: 'var(--color-secondary)', marginBottom: '32px' }}>Staff Login</p>
+        <p style={{ color: 'var(--color-secondary)', marginBottom: '32px' }}>Mitarbeiter-Login</p>
 
         {error && (
           <div style={{ background: 'var(--color-error)', color: 'white', padding: '10px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '14px' }}>
@@ -52,19 +52,23 @@ export function LoginPage() {
 
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Benutzername"
           value={username}
           onChange={e => setUsername(e.target.value)}
           style={{ width: '100%', marginBottom: '12px', height: '48px', fontSize: '16px' }}
         />
 
         {/* PIN display */}
+        <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--color-secondary)' }}>
+          4-stelliger PIN
+        </p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '20px' }}>
           {[0,1,2,3].map(i => (
             <div key={i} style={{
               width: '48px', height: '48px', borderRadius: '50%',
               border: '2px solid var(--color-gray-200)',
               background: i < pin.length ? 'var(--color-black)' : 'transparent',
+              transition: 'background 0.15s',
             }} />
           ))}
         </div>
@@ -87,15 +91,20 @@ export function LoginPage() {
         </div>
 
         <button className="button primary" onClick={handleLogin} disabled={loading || !username || pin.length < 4}
-          style={{ width: '100%', height: '52px', fontSize: '16px', opacity: (!username || pin.length < 4) ? 0.5 : 1 }}>
-          {loading ? 'Logging in...' : 'Login'}
+          style={{
+            width: '100%', height: '52px', fontSize: '16px',
+            opacity: (!username || pin.length < 4) ? 0.4 : 1,
+            background: (!username || pin.length < 4) ? '#9ca3af' : undefined,
+            cursor: (!username || pin.length < 4) ? 'not-allowed' : 'pointer',
+          }}>
+          {loading ? 'Anmeldung...' : (!username || pin.length < 4) ? 'Benutzername + PIN eingeben' : 'Anmelden'}
         </button>
 
         <a href="/demo" style={{ display: 'block', marginTop: '20px', color: 'var(--color-primary)', fontSize: '14px', textDecoration: 'none', fontWeight: '600' }}>
           Demo ausprobieren →
         </a>
         <a href="/guest" style={{ display: 'block', marginTop: '10px', color: 'var(--color-info)', fontSize: '13px', textDecoration: 'none' }}>
-          Guest? Order here
+          Gast? Hier bestellen
         </a>
       </div>
     </div>

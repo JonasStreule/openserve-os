@@ -11,10 +11,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+  # Redis removed — not currently used in application code.
+  # Re-add when implementing session store or caching.
 
 volumes:
   postgres_data:

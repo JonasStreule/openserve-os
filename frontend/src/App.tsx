@@ -6,8 +6,13 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { LoginPage } from './components/LoginPage';
 import { DemoPage } from './components/DemoPage';
 import { FloorPlan } from './components/FloorPlan';
+import { BarDisplay } from './components/BarDisplay';
+import { GrillDisplay } from './components/GrillDisplay';
+import { RunnerDisplay } from './components/RunnerDisplay';
+import { TaskPool } from './components/TaskPool';
 import { KioskLock } from './components/KioskLock';
 import { LandingPage } from './components/LandingPage';
+import { ToastContainer } from './components/Toast';
 
 function getUser(): { role: string } | null {
   try {
@@ -27,6 +32,8 @@ function PrivateRoute({ children, roles }: { children: React.ReactNode; roles: s
 
 function App() {
   return (
+    <>
+    <ToastContainer />
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -51,6 +58,34 @@ function App() {
         }
       />
       <Route
+        path="/bar"
+        element={
+          <KioskLock stationName="Bar-Station">
+            <PrivateRoute roles={['kitchen', 'service', 'admin']}>
+              <BarDisplay />
+            </PrivateRoute>
+          </KioskLock>
+        }
+      />
+      <Route
+        path="/grill"
+        element={
+          <KioskLock stationName="Grill-Station">
+            <PrivateRoute roles={['kitchen', 'service', 'admin']}>
+              <GrillDisplay />
+            </PrivateRoute>
+          </KioskLock>
+        }
+      />
+      <Route
+        path="/runner"
+        element={
+          <PrivateRoute roles={['service', 'admin']}>
+            <RunnerDisplay />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/floor"
         element={
           <KioskLock stationName="Buffet / Tischplan">
@@ -58,6 +93,14 @@ function App() {
               <FloorPlan />
             </PrivateRoute>
           </KioskLock>
+        }
+      />
+      <Route
+        path="/tasks"
+        element={
+          <PrivateRoute roles={['service', 'kitchen', 'admin']}>
+            <TaskPool />
+          </PrivateRoute>
         }
       />
       <Route
@@ -70,6 +113,7 @@ function App() {
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
 

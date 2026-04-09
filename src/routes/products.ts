@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { pool } from '../config/database';
+import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
@@ -33,18 +34,25 @@ router.get('/categories', async (req, res) => {
   }
 });
 
-// POST /api/products - Create product
-router.post('/', async (req, res) => {
+// POST /api/products - Create product (admin only)
+router.post('/', requireAuth, requireRole('admin'), async (req, res) => {
   try {
-    const { name, category, price } = req.body;
-    if (!name || !price) {
-      res.status(400).json({ error: 'name and price required' });
+    const { name, category, price, station } = req.body;
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      res.status(400).json({ error: 'name is required' });
       return;
     }
+    const safePrice = parseFloat(price);
+    if (isNaN(safePrice) || safePrice < 0) {
+      res.status(400).json({ error: 'price must be a non-negative number' });
+      return;
+    }
+    const validStations = ['kitchen', 'bar', 'grill', 'direct'];
+    const safeStation = validStations.includes(station) ? station : 'kitchen';
 
     const result = await pool.query(
-      'INSERT INTO products (name, category, price) VALUES ($1, $2, $3) RETURNING *',
-      [name, category || 'Uncategorized', price]
+      'INSERT INTO products (name, category, price, station) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name.trim(), category || 'Uncategorized', safePrice, safeStation]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -52,13 +60,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/products/:id - Update product
-router.put('/:id', async (req, res) => {
+// PUT /api/products/:id - Update product (admin only)
+router.put('/:id', requireAuth, requireRole('admin'), async (req, res) => {
   try {
-    const { name, category, price } = req.body;
+    const { name, category, price, station } = req.body;
     const result = await pool.query(
-      'UPDATE products SET name = COALESCE($1, name), category = COALESCE($2, category), price = COALESCE($3, price) WHERE id = $4 RETURNING *',
-      [name, category, price, req.params.id]
+      'UPDATE products SET name = COALESCE($1, name), category = COALESCE($2, category), price = COALESCE($3, price), station = COALESCE($4, station) WHERE id = $5 RETURNING *',
+      [name, category, price, station, req.params.id]
     );
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Product not found' });
@@ -70,8 +78,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/products/:id - Delete product
-router.delete('/:id', async (req, res) => {
+// DELETE /api/products/:id - Delete product (admin only)
+router.delete('/:id', requireAuth, requireRole('admin'), async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING id', [req.params.id]);
     if (result.rows.length === 0) {

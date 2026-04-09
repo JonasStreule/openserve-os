@@ -122,6 +122,16 @@ const RESTAURANTS: Restaurant[] = [
         description: 'Stationslogin für das feste Küchengerät — kein persönlicher Mitarbeiter-Account.',
       },
       {
+        label: 'Bar-Station (Getränke)',
+        tag: 'Station',
+        tagColor: '#2563eb',
+        username: 'Bar',
+        pin: '5555',
+        role: 'kitchen',
+        description: 'Bar-Display — zeigt nur Getränke-Bestellungen. Items einzeln als fertig markieren.',
+        qrToken: '',
+      },
+      {
         label: 'Buffet-Station (Tischplan)',
         tag: 'Station',
         tagColor: '#7c3aed',
@@ -138,6 +148,88 @@ const RESTAURANTS: Restaurant[] = [
         pin: '',
         role: 'guest',
         description: 'Bestellt per QR-Code — wählt aus der vollständigen Karte, verfolgt den Status live.',
+        qrToken: 'table-T2-e5f6g7h8',
+      },
+    ],
+  },
+  {
+    emoji: '🐄',
+    name: 'Viehschau-Fest',
+    badge: 'Grossanlass',
+    badgeColor: '#b45309',
+    headline: '40 Tische · 10 Service · Grill + Buffet + Bar · Drinnen & Draussen',
+    personas: [
+      {
+        label: 'Chef — Festleitung & Admin',
+        tag: 'Admin',
+        tagColor: 'var(--color-error)',
+        username: 'Admin',
+        pin: '0000',
+        role: 'admin',
+        description: 'Überblick über alles: Umsatz, Speisekarte, Mitarbeiter, Audit-Log.',
+      },
+      {
+        label: 'Lisa — Bestellungen & Kasse',
+        tag: 'Service',
+        tagColor: 'var(--color-info)',
+        username: 'Anna',
+        pin: '1234',
+        role: 'service',
+        description: 'Nimmt Bestellungen auf, kassiert. Arbeitet am Buffet oder läuft durch die Tische.',
+      },
+      {
+        label: 'Sandra — Bestellungen & Kasse',
+        tag: 'Service',
+        tagColor: 'var(--color-info)',
+        username: 'Marco',
+        pin: '1234',
+        role: 'service',
+        description: 'Zweite Servicekraft für Bestellungen und Kassieren.',
+      },
+      {
+        label: 'Maria — Runnerin (nur bringen)',
+        tag: 'Runner',
+        tagColor: '#059669',
+        username: 'Anna',
+        pin: '1234',
+        role: 'service',
+        description: 'Sieht nur fertige Bestellungen → bringt sie zum Tisch → markiert als serviert.',
+      },
+      {
+        label: 'Grill-Station (Handschuh-Modus)',
+        tag: 'Station',
+        tagColor: '#dc2626',
+        username: 'Grill',
+        pin: '5555',
+        role: 'kitchen',
+        description: 'Extra-grosse Buttons für dreckige Hände / Handschuhe. Zeigt nur Grill-Items.',
+      },
+      {
+        label: 'Buffet-Station (Tischplan)',
+        tag: 'Station',
+        tagColor: '#7c3aed',
+        username: 'Buffet',
+        pin: '6666',
+        role: 'service',
+        description: 'Grafische Tischübersicht — 40 Tische, Zonen Drinnen/Draussen.',
+      },
+      {
+        label: 'Bar-Station (Getränke)',
+        tag: 'Station',
+        tagColor: '#2563eb',
+        username: 'Bar',
+        pin: '5555',
+        role: 'kitchen',
+        description: 'Getränke-Display — Bier, Wein, Softdrinks. Items als fertig markieren.',
+      },
+      {
+        label: 'Gast am Tisch (QR-Code)',
+        tag: 'Gast',
+        tagColor: 'var(--color-secondary)',
+        username: '',
+        pin: '',
+        role: 'guest',
+        description: 'Gäste bestellen selbst per QR-Code am Tisch — entlastet das Service-Team.',
         qrToken: 'table-T2-e5f6g7h8',
       },
     ],
@@ -170,7 +262,11 @@ export function DemoPage() {
       localStorage.setItem('user', JSON.stringify(data.user));
       // Station personas go to their station route
       if (persona.username === 'Buffet') { navigate('/floor'); return; }
+      if (persona.username === 'Bar') { navigate('/bar'); return; }
       if (persona.username === 'Küche') { navigate('/kitchen'); return; }
+      if (persona.username === 'Grill') { navigate('/grill'); return; }
+      if (persona.tag === 'Runner') { navigate('/runner'); return; }
+      if (persona.tag === 'Tasks') { navigate('/tasks'); return; }
       switch (data.user.role) {
         case 'admin': navigate('/admin'); break;
         case 'kitchen': navigate('/kitchen'); break;

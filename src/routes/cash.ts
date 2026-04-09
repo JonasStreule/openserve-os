@@ -3,37 +3,46 @@ import { pool } from '../config/database';
 
 const router = Router();
 
-// POST /api/cash/open - Open a cash session (check-in)
+// POST /api/cash/open - Open a cash session (check-in, race-safe)
 router.post('/open', async (req, res) => {
+  const client = await pool.connect();
   try {
     const { user_id, opening_amount } = req.body;
+    const safeAmount = Math.max(0, parseFloat(opening_amount) || 0);
 
-    // Check if there's already an open session
-    const existing = await pool.query(
-      "SELECT * FROM cash_sessions WHERE status = 'open'"
+    await client.query('BEGIN');
+
+    // Lock to prevent concurrent opens
+    const existing = await client.query(
+      "SELECT * FROM cash_sessions WHERE status = 'open' FOR UPDATE"
     );
     if (existing.rows.length > 0) {
+      await client.query('ROLLBACK');
       res.status(409).json({ error: 'A cash session is already open', session: existing.rows[0] });
       return;
     }
 
-    const result = await pool.query(
+    const result = await client.query(
       `INSERT INTO cash_sessions (user_id, opening_amount, status)
        VALUES ($1, $2, 'open')
        RETURNING *`,
-      [user_id || null, opening_amount || 0]
+      [user_id || null, safeAmount]
     );
 
-    await pool.query(
+    await client.query(
       `INSERT INTO audit_events (entity_type, entity_id, event_type, new_value)
        VALUES ('cash_session', $1, 'opened', $2)`,
-      [result.rows[0]!.id, JSON.stringify({ opening_amount: opening_amount || 0 })]
+      [result.rows[0]!.id, JSON.stringify({ opening_amount: safeAmount })]
     );
 
+    await client.query('COMMIT');
     res.status(201).json(result.rows[0]);
   } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('Failed to open cash session:', error);
     res.status(500).json({ error: 'Failed to open cash session' });
+  } finally {
+    client.release();
   }
 });
 

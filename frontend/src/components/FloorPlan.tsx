@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { useWebSocket } from '../services/useWebSocket';
+import { showToast } from './Toast';
 
 interface Table {
   id: string;
@@ -95,14 +96,16 @@ export function FloorPlan() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
   useEffect(() => { if (lastMessage) fetchData(); }, [lastMessage, fetchData]);
+  // Fallback polling only when WebSocket is disconnected
   useEffect(() => {
+    if (connected) return;
     const iv = setInterval(fetchData, 8000);
     return () => clearInterval(iv);
-  }, [fetchData]);
+  }, [fetchData, connected]);
 
   useEffect(() => {
     api.getProducts().then((d: any) => {
-      const ps: Product[] = d.products || [];
+      const ps: Product[] = (d.products || []).map((p: any) => ({ ...p, price: parseFloat(p.price) || 0 }));
       setProducts(ps);
       const cats = [...new Set(ps.map((p: Product) => p.category))];
       if (cats.length > 0) setActiveCategory(cats[0]!);
@@ -116,6 +119,9 @@ export function FloorPlan() {
   };
 
   const closeModal = () => {
+    if (cart.length > 0) {
+      if (!window.confirm(`Warenkorb hat ${cart.reduce((s, c) => s + c.qty, 0)} Position(en). Wirklich abbrechen?`)) return;
+    }
     setSelected(null);
     setCart([]);
     setSuccessMsg('');
@@ -152,10 +158,11 @@ export function FloorPlan() {
       });
       setSuccessMsg('Bestellung aufgegeben!');
       setCart([]);
+      showToast('Bestellung aufgegeben!', 'success');
       fetchData();
-      setTimeout(() => { setSuccessMsg(''); }, 2000);
+      setTimeout(() => { setSuccessMsg(''); }, 3000);
     } catch {
-      // ignore
+      showToast('Bestellung fehlgeschlagen', 'error');
     }
     setSubmitting(false);
   };

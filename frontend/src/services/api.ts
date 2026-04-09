@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || '';
+const REQUEST_TIMEOUT = 15000; // 15 seconds
 
 function getToken(): string | null {
   return localStorage.getItem('token');
@@ -11,10 +12,25 @@ async function request(path: string, options?: RequestInit & { noAuth?: boolean 
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  // Abort controller for request timeout
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...options, headers, signal: controller.signal });
+  } catch (err: any) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      throw new Error('Server antwortet nicht. Bitte Verbindung prüfen.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (res.status === 401 && !path.includes('/auth/')) {
-    const kioskRoutes = ['/kitchen', '/floor'];
+    const kioskRoutes = ['/kitchen', '/floor', '/bar', '/guest'];
     const isKiosk = kioskRoutes.some(r => window.location.pathname.startsWith(r));
     if (isKiosk) {
       window.dispatchEvent(new CustomEvent('kiosk:locked'));
@@ -24,6 +40,11 @@ async function request(path: string, options?: RequestInit & { noAuth?: boolean 
       window.location.href = '/login';
     }
     throw new Error('Unauthorized');
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Server error (${res.status})`);
   }
 
   return res.json();
@@ -55,13 +76,15 @@ export const api = {
 
   // Guest (public)
   createSession: (qr_token: string, device_id: string) => request('/api/guests/session', { method: 'POST', body: JSON.stringify({ qr_token, device_id }), noAuth: true } as any),
-  createGuestOrder: (data: any) => request('/api/orders', { method: 'POST', body: JSON.stringify(data), noAuth: true } as any),
+  createGuestOrder: (data: any) => request('/api/guests/order', { method: 'POST', body: JSON.stringify(data), noAuth: true } as any),
 
   // Orders
-  getOrders: () => request('/api/orders'),
+  getOrders: (station?: string) => request(`/api/orders${station ? `?station=${station}` : ''}`),
   getOrder: (id: string) => request(`/api/orders/${id}`),
   createOrder: (data: any) => request('/api/orders', { method: 'POST', body: JSON.stringify(data) }),
   updateOrder: (id: string, status: string) => request(`/api/orders/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  updateOrderItem: (orderId: string, itemId: string, status: string) =>
+    request(`/api/orders/${orderId}/items/${itemId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   cancelOrder: (id: string) => request(`/api/orders/${id}`, { method: 'DELETE' }),
 
   // Payments
@@ -74,6 +97,15 @@ export const api = {
   closeCash: (amount: number, notes?: string) => request('/api/cash/close', { method: 'POST', body: JSON.stringify({ closing_amount: amount, notes }) }),
   getCashCurrent: () => request('/api/cash/current'),
   getCashHistory: () => request('/api/cash/history'),
+
+  // Tasks
+  getTasks: (params?: string) => request(`/api/tasks${params ? `?${params}` : ''}`),
+  createTask: (data: any) => request('/api/tasks', { method: 'POST', body: JSON.stringify(data) }),
+  claimTask: (id: string) => request(`/api/tasks/${id}/claim`, { method: 'PATCH' }),
+  unclaimTask: (id: string) => request(`/api/tasks/${id}/unclaim`, { method: 'PATCH' }),
+  completeTask: (id: string) => request(`/api/tasks/${id}/done`, { method: 'PATCH' }),
+  deleteTask: (id: string) => request(`/api/tasks/${id}`, { method: 'DELETE' }),
+  getTaskStats: () => request('/api/tasks/stats'),
 
   // Admin
   getMetrics: () => request('/api/admin/metrics'),

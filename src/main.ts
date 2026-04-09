@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import http from 'http';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
@@ -16,6 +17,7 @@ import adminRoutes from './routes/admin';
 import productRoutes from './routes/products';
 import tableRoutes from './routes/tables';
 import userRoutes from './routes/users';
+import taskRoutes from './routes/tasks';
 
 dotenv.config();
 
@@ -39,6 +41,12 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
   : ['http://localhost:5173', 'http://localhost:4173', 'http://localhost:80'];
 
+// ── Security headers ─────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false,  // CSP handled by frontend/Nginx in production
+  crossOriginEmbedderPolicy: false,
+}));
+
 app.use(cors({
   origin: (origin, cb) => {
     // Allow requests with no origin (curl, mobile apps, same-origin)
@@ -49,7 +57,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '16kb' }));
 
 // ── Rate limiting ─────────────────────────────────────────────
 // Strict limit on login to prevent PIN brute-force
@@ -111,8 +119,9 @@ app.use('/api/cash', requireAuth, requireRole('admin', 'service'), cashRoutes);
 
 // ── Admin-only routes ─────────────────────────────────────────
 app.use('/api/admin', requireAuth, requireRole('admin'), adminRoutes);
-app.use('/api/tables', requireAuth, requireRole('admin'), tableRoutes);
+app.use('/api/tables', requireAuth, tableRoutes);
 app.use('/api/users', requireAuth, requireRole('admin'), userRoutes);
+app.use('/api/tasks', requireAuth, taskRoutes);
 
 // ── Error handler ─────────────────────────────────────────────
 app.use((err: any, _req: any, res: any, _next: any) => {
@@ -121,12 +130,61 @@ app.use((err: any, _req: any, res: any, _next: any) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
+// ── Process error handlers ────────────────────────────────────
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION — shutting down:', err);
+  if (process.env.SENTRY_DSN) Sentry.captureException(err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  if (process.env.SENTRY_DSN) Sentry.captureException(reason);
+});
+
+// ── Graceful shutdown ─────────────────────────────────────────
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal: string) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log(`\n${signal} received — graceful shutdown started`);
+
+  // 1. Stop accepting new connections
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+
+  // 2. Close WebSocket connections
+  wsService.shutdown();
+
+  // 3. Drain database pool
+  try {
+    await pool.end();
+    console.log('Database pool drained');
+  } catch (err) {
+    console.error('Error draining DB pool:', err);
+  }
+
+  // 4. Force exit after 10s if still hanging
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000).unref();
+
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
 // ── Start ─────────────────────────────────────────────────────
 wsService.init(server);
 
 server.listen(PORT, async () => {
   console.log(`OpenServe OS server running on port ${PORT}`);
   console.log(`WebSocket server ready on ws://localhost:${PORT}`);
+  console.log(`DB pool: max=${process.env.DB_POOL_MAX || 25}, min=${process.env.DB_POOL_MIN || 5}`);
   await testConnection();
 });
 

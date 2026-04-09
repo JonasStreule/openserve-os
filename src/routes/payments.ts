@@ -16,10 +16,22 @@ router.post('/orders/:id/payment', async (req, res) => {
       return;
     }
 
+    if (typeof amount !== 'number' || amount <= 0) {
+      res.status(400).json({ error: 'amount must be a positive number' });
+      return;
+    }
+
+    if (tip !== undefined && tip !== null && (typeof tip !== 'number' || tip < 0)) {
+      res.status(400).json({ error: 'tip must be a non-negative number' });
+      return;
+    }
+
     if (!['cash', 'card', 'twint'].includes(method)) {
       res.status(400).json({ error: 'method must be cash, card, or twint' });
       return;
     }
+
+    await client.query('BEGIN');
 
     // Idempotency check - return existing payment if key already used
     if (idempotency_key) {
@@ -28,16 +40,15 @@ router.post('/orders/:id/payment', async (req, res) => {
         [idempotency_key]
       );
       if (existing.rows.length > 0) {
+        await client.query('ROLLBACK');
         res.json(existing.rows[0]);
         return;
       }
     }
 
-    await client.query('BEGIN');
-
-    // Verify order exists and is unpaid
+    // Verify order exists and is unpaid (lock to prevent double-pay)
     const orderResult = await client.query(
-      'SELECT * FROM orders WHERE id = $1',
+      'SELECT * FROM orders WHERE id = $1 FOR UPDATE',
       [orderId]
     );
 

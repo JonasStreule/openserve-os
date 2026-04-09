@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { pool } from '../config/database';
+import { requireRole } from '../middleware/auth';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/tables - Create table (auto-generates QR token)
-router.post('/', async (req, res) => {
+router.post('/', requireRole('admin'), async (req, res) => {
   try {
     const { table_number, capacity } = req.body;
     if (!table_number) {
@@ -40,7 +41,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/tables/:id - Update table
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireRole('admin'), async (req, res) => {
   try {
     const { table_number, capacity } = req.body;
     const result = await pool.query(
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/tables/:id - Delete table
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('admin'), async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM tables WHERE id = $1 RETURNING id', [req.params.id]);
     if (result.rows.length === 0) {

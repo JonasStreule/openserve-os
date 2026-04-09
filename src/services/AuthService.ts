@@ -20,7 +20,7 @@ export class AuthService {
     return jwt.sign(
       { userId, role, iat: Math.floor(Date.now() / 1000) },
       JWT_SECRET,
-      { expiresIn: expiry }
+      { expiresIn: expiry } as any
     );
   }
 
