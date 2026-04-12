@@ -19,7 +19,7 @@ export async function generateQrPdf(
     .map(
       (t, i) => `
       <div class="card">
-        <p class="restaurant">OpenServe OS</p>
+        <p class="restaurant">immerdra.ch</p>
         <img src="${qrDataUrls[i]}" width="200" height="200" />
         <p class="table-num">Tisch ${t.table_number}</p>
         <p class="scan-hint">Scannen zum Bestellen</p>
@@ -31,7 +31,7 @@ export async function generateQrPdf(
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<title>QR-Codes - OpenServe OS</title>
+<title>QR-Codes - immerdra.ch</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }

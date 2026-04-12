@@ -6,6 +6,14 @@ import { generateCashReport } from '../utils/cashReport';
 import { ConfirmModal } from './ConfirmModal';
 import { showToast } from './Toast';
 
+interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit_price: string;
+  status: string;
+}
+
 interface Order {
   id: string;
   order_number: number;
@@ -16,6 +24,7 @@ interface Order {
   tip_amount: string;
   created_at: string;
   updated_at: string;
+  items: OrderItem[];
 }
 
 interface CashSession {
@@ -260,6 +269,13 @@ export function ServiceUI() {
                   CHF {parseFloat(order.total_amount).toFixed(2)}
                 </span>
               </div>
+              {order.items && order.items.length > 0 && (
+                <div style={{ fontSize: '13px', color: 'var(--color-secondary)', marginTop: '4px' }}>
+                  {order.items.map((item, i) => (
+                    <span key={i}>{item.quantity > 1 ? `${item.quantity}× ` : ''}{item.name}{i < order.items.length - 1 ? ', ' : ''}</span>
+                  ))}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                 <button
                   className="button primary"

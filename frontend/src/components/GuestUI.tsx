@@ -172,7 +172,7 @@ export function GuestUI() {
   if (!qrToken) {
     return (
       <div style={{ padding: '24px', textAlign: 'center', maxWidth: '400px', margin: '0 auto', marginTop: '80px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>OpenServe OS</h1>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>immerdra.ch</h1>
         <p style={{ color: 'var(--color-secondary)', marginBottom: '32px' }}>Bitte scannen Sie den QR-Code an Ihrem Tisch, um zu bestellen.</p>
       </div>
     );
@@ -221,15 +221,13 @@ export function GuestUI() {
           </p>
         </div>
 
-        {placedOrder.status === 'served' && (
-          <button
-            className="button primary"
-            style={{ width: '100%', height: '48px', fontSize: '16px' }}
-            onClick={() => setPlacedOrder(null)}
-          >
-            Weitere Bestellung aufgeben
-          </button>
-        )}
+        <button
+          className="button primary"
+          style={{ width: '100%', height: '48px', fontSize: '16px' }}
+          onClick={() => setPlacedOrder(null)}
+        >
+          {placedOrder.status === 'served' ? 'Weitere Bestellung aufgeben' : 'Zurück zur Karte'}
+        </button>
       </div>
     );
   }
@@ -244,7 +242,7 @@ export function GuestUI() {
       {/* Header */}
       <div style={{ padding: '16px', borderBottom: '1px solid var(--color-gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <p style={{ margin: 0, fontSize: '11px', color: 'var(--color-secondary)', fontWeight: '500', letterSpacing: '0.5px' }}>OpenServe OS</p>
+          <p style={{ margin: 0, fontSize: '11px', color: 'var(--color-secondary)', fontWeight: '500', letterSpacing: '0.5px' }}>immerdra.ch</p>
           <h1 style={{ margin: 0, fontSize: '22px' }}>Speisekarte</h1>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -258,7 +256,7 @@ export function GuestUI() {
       </div>
 
       {/* Category tabs */}
-      <div style={{ overflowX: 'auto', display: 'flex', gap: '8px', padding: '12px 16px', borderBottom: '1px solid var(--color-gray-200)' }}>
+      <div style={{ overflowX: 'auto', display: 'flex', gap: '8px', padding: '12px 16px', borderBottom: '1px solid var(--color-gray-200)', scrollbarWidth: 'none', msOverflowStyle: 'none' } as any}>
         {categories.map(cat => (
           <button
             key={cat}

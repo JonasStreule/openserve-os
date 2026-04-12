@@ -90,7 +90,7 @@ export function generateCashReport(data: CashReportData): void {
 </head>
 <body>
   <div class="header">
-    <h1>OpenServe OS &mdash; Tagesabschluss</h1>
+    <h1>immerdra.ch &mdash; Tagesabschluss</h1>
     <div class="date">${data.date}</div>
   </div>
 

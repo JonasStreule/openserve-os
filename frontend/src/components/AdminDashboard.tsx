@@ -508,7 +508,7 @@ export function AdminDashboard() {
               <div key={t.id} className="card" style={{ padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <span style={{ fontWeight: '600' }}>Tisch {t.table_number}</span>
-                  <span style={{ marginLeft: '8px', fontSize: '13px', color: 'var(--color-secondary)' }}>{t.capacity} Plätze</span>
+                  <span style={{ marginLeft: '8px', fontSize: '13px', color: 'var(--color-secondary)' }}>{t.capacity} {t.capacity === 1 ? 'Platz' : 'Plätze'}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '12px', color: 'var(--color-secondary)', fontFamily: 'monospace' }}>
@@ -565,7 +565,7 @@ export function AdminDashboard() {
                     textTransform: 'uppercase',
                     color: u.role === 'admin' ? 'var(--color-error)' : u.role === 'kitchen' ? 'var(--color-info)' : 'var(--color-success)',
                   }}>
-                    {u.role}
+                    {u.role === 'admin' ? 'Admin' : u.role === 'kitchen' ? 'Küche' : 'Service'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>

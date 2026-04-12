@@ -284,7 +284,7 @@ export function DemoPage() {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: '700', margin: '0 0 6px 0' }}>OpenServe OS</h1>
+          <h1 style={{ fontSize: '26px', fontWeight: '700', margin: '0 0 6px 0' }}>immerdra.ch</h1>
           <p style={{ color: 'var(--color-secondary)', margin: '0 0 4px 0', fontSize: '15px' }}>Demo-Umgebung</p>
           <p style={{ color: 'var(--color-secondary)', fontSize: '13px', margin: 0 }}>
             Wähle einen Betrieb und eine Rolle — ein Klick genügt.

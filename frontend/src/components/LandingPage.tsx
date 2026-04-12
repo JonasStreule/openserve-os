@@ -9,11 +9,6 @@ const FEATURES = [
   { emoji: '🔒', title: 'Rollen & Stationen', desc: 'Persönliche Logins für Mitarbeiter. Stationslogins für Küche und Buffet-Display.' },
 ];
 
-const PRICING = [
-  { name: 'Starter', price: 'CHF 49', period: '/ Monat', desc: 'Für kleine Betriebe', features: ['Bis 10 Tische', '3 Mitarbeiter-Accounts', 'E-Mail Support'] },
-  { name: 'Pro', price: 'CHF 99', period: '/ Monat', desc: 'Für Restaurants', features: ['Unbegrenzte Tische', 'Unbegrenzte Mitarbeiter', 'Küchen-Display', 'Tischplan', 'Prioritäts-Support'], highlight: true },
-  { name: 'Enterprise', price: 'Auf Anfrage', period: '', desc: 'Für Ketten & Hotels', features: ['Mehrere Standorte', 'Custom Branding', 'Dedicated Server', 'SLA Garantie'] },
-];
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -23,9 +18,9 @@ export function LandingPage() {
 
       {/* Nav */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-gray-200)', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '56px' }}>
-        <span style={{ fontWeight: '700', fontSize: '18px' }}>OpenServe OS</span>
+        <span style={{ fontWeight: '700', fontSize: '18px' }}>immerdra.ch</span>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <a href="#preise" style={{ fontSize: '14px', color: 'var(--color-secondary)', textDecoration: 'none' }}>Preise</a>
+          <a href="#funktionen" style={{ fontSize: '14px', color: 'var(--color-secondary)', textDecoration: 'none' }}>Funktionen</a>
           <button className="button secondary" style={{ height: '36px', fontSize: '14px' }} onClick={() => navigate('/demo')}>
             Demo
           </button>
@@ -124,43 +119,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="preise" style={{ padding: '72px 24px', maxWidth: '900px', margin: '0 auto' }}>
-        <h2 style={{ textAlign: 'center', fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: '700', margin: '0 0 8px 0' }}>
-          Transparente Preise
-        </h2>
-        <p style={{ textAlign: 'center', color: 'var(--color-secondary)', margin: '0 0 48px 0', fontSize: '16px' }}>
-          Monatlich kündbar. Keine Einrichtungsgebühr. Keine versteckten Kosten.
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-          {PRICING.map(p => (
-            <div key={p.name} className="card" style={{ padding: '28px 24px', border: p.highlight ? '2px solid var(--color-black)' : undefined, position: 'relative' }}>
-              {p.highlight && (
-                <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'var(--color-black)', color: 'white', fontSize: '11px', fontWeight: '700', padding: '3px 12px', borderRadius: '10px', whiteSpace: 'nowrap' }}>
-                  EMPFOHLEN
-                </div>
-              )}
-              <p style={{ margin: '0 0 4px 0', fontWeight: '700', fontSize: '18px' }}>{p.name}</p>
-              <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: 'var(--color-secondary)' }}>{p.desc}</p>
-              <div style={{ margin: '16px 0', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                <span style={{ fontSize: '32px', fontWeight: '800' }}>{p.price}</span>
-                <span style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>{p.period}</span>
-              </div>
-              <ul style={{ margin: '0 0 24px 0', padding: '0 0 0 16px', fontSize: '14px', color: 'var(--color-secondary)', lineHeight: '2' }}>
-                {p.features.map(f => <li key={f}>{f}</li>)}
-              </ul>
-              <button
-                className={`button ${p.highlight ? 'primary' : 'secondary'}`}
-                style={{ width: '100%', fontSize: '15px' }}
-                onClick={() => navigate('/demo')}
-              >
-                {p.name === 'Enterprise' ? 'Kontakt aufnehmen' : 'Demo starten'}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* CTA */}
       <section style={{ background: 'var(--color-black)', color: 'white', padding: '72px 24px', textAlign: 'center' }}>
         <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: '700', margin: '0 0 16px 0', color: 'white' }}>
@@ -181,8 +139,8 @@ export function LandingPage() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--color-gray-200)', padding: '24px', textAlign: 'center', fontSize: '13px', color: 'var(--color-secondary)' }}>
         <p style={{ margin: 0 }}>
-          © {new Date().getFullYear()} OpenServe OS — Entwickelt von Jonas Streule ·{' '}
-          <a href="mailto:jonas.streule@gmail.com" style={{ color: 'var(--color-info)', textDecoration: 'none' }}>Kontakt</a>
+          © {new Date().getFullYear()} immerdra.ch — Ein Projekt von edv.sg ·{' '}
+          <a href="mailto:hello@edv.sg" style={{ color: 'var(--color-info)', textDecoration: 'none' }}>Kontakt</a>
         </p>
       </footer>
     </div>

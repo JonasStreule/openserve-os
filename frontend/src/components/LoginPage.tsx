@@ -41,7 +41,7 @@ export function LoginPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-gray-100)' }}>
       <div style={{ width: '320px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '4px' }}>OpenServe OS</h1>
+        <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '4px' }}>immerdra.ch</h1>
         <p style={{ color: 'var(--color-secondary)', marginBottom: '32px' }}>Mitarbeiter-Login</p>
 
         {error && (
