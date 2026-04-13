@@ -27,7 +27,7 @@ export function useWebSocket(channel: string) {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = import.meta.env.VITE_WS_URL || `${protocol}//${window.location.host}`;
-    const ws = new WebSocket(`${wsUrl}?channel=${channel}`);
+    const ws = new WebSocket(`${wsUrl}/ws?channel=${channel}`);
 
     ws.onopen = () => {
       if (!mountedRef.current) { ws.close(); return; }

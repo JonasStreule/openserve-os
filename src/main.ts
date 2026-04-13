@@ -32,6 +32,7 @@ if (process.env.SENTRY_DSN) {
 }
 
 const app = express();
+app.set('trust proxy', 1); // trust first proxy (Caddy) for correct client IP behind Cloudflare→Caddy
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
