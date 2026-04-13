@@ -137,10 +137,14 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid var(--color-gray-200)', padding: '24px', textAlign: 'center', fontSize: '13px', color: 'var(--color-secondary)' }}>
+      <footer style={{ borderTop: '1px solid var(--color-gray-200)', padding: '32px 24px', textAlign: 'center', fontSize: '13px', color: 'var(--color-secondary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          <a href="mailto:admin@immerdra.ch" style={{ color: 'var(--color-info)', textDecoration: 'none' }}>admin@immerdra.ch</a>
+          <a href="tel:+41786491945" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>+41 78 649 19 45</a>
+        </div>
         <p style={{ margin: 0 }}>
           © {new Date().getFullYear()} immerdra.ch — Ein Projekt von edv.sg ·{' '}
-          <a href="mailto:kontakt@edv.sg" style={{ color: 'var(--color-info)', textDecoration: 'none' }}>Kontakt</a>
+          <a href="mailto:kontakt@edv.sg" style={{ color: 'var(--color-secondary)', textDecoration: 'none' }}>Kontakt</a>
         </p>
       </footer>
     </div>
