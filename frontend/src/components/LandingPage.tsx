@@ -140,7 +140,7 @@ export function LandingPage() {
       <footer style={{ borderTop: '1px solid var(--color-gray-200)', padding: '24px', textAlign: 'center', fontSize: '13px', color: 'var(--color-secondary)' }}>
         <p style={{ margin: 0 }}>
           © {new Date().getFullYear()} immerdra.ch — Ein Projekt von edv.sg ·{' '}
-          <a href="mailto:hello@edv.sg" style={{ color: 'var(--color-info)', textDecoration: 'none' }}>Kontakt</a>
+          <a href="mailto:kontakt@edv.sg" style={{ color: 'var(--color-info)', textDecoration: 'none' }}>Kontakt</a>
         </p>
       </footer>
     </div>
